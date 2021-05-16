@@ -1,6 +1,6 @@
 import React, { useLayoutEffect, useState } from 'react'
 import { TouchableOpacity, TouchableWithoutFeedback } from 'react-native'
-import { View, TextInput } from 'react-native'
+import { View, TextInput, Text } from 'react-native'
 import { Avatar } from 'react-native-elements/dist/avatar/Avatar'
 import { AntDesign, Feather } from "@expo/vector-icons"
 import { StatusBar } from 'react-native'
@@ -75,8 +75,8 @@ const ChatScreen = ({ navigation, route }) => {
         .doc(route.params.id)
         .collection('messages')
         .orderBy('timestamp', 'desc')
-        .onSnapshot(snapshot => setMessages(
-            snapshot.docs.map(doc => ({
+        .onSnapshot((snapshot) => setMessages(
+            snapshot.docs.map((doc) => ({
                 id: doc.id,
                 data: doc.data(),
             }))
@@ -94,6 +94,51 @@ const ChatScreen = ({ navigation, route }) => {
             >
                 <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
                     <>
+                    <ScrollView>
+                        {messages.map(({id, data}) => (
+                            data.email === auth.currentUser.email ? (
+                                <View key={id} style={styles.receiver}>
+                                    <Avatar 
+                                    position="absolute"
+                                    rounded
+                                    // for web view
+                                    containerStyle={{ 
+                                        position: "absolute",
+                                        bottom: -15,
+                                        right: -5, 
+                                     }}
+                                    size={30}
+                                    right={-5}
+                                    bottom={-15}
+                                    source={{ 
+                                        uri: data.photoURL,
+                                     }}
+                                    />
+                                    <Text style={styles.receiverText}>{data.message}</Text>
+                                </View>
+                            ) : (
+                                <View style={styles.sender}>
+                                    <Avatar 
+                                    position="absolute"
+                                    rounded
+                                    // for web view
+                                    containerStyle={{ 
+                                        position: "absolute",
+                                        bottom: -15,
+                                        left: -5, 
+                                     }}
+                                    size={30}
+                                    left={-5}
+                                    bottom={-15}
+                                    source={{ 
+                                        uri: data.photoURL,
+                                     }}
+                                    />
+                                    <Text style={styles.senderText}>{data.message}</Text>
+                                </View>
+                            )
+                        ))}
+                    </ScrollView>
                         <ScrollView>{}</ScrollView>
                         <View style={styles.footer}>
                             <TextInput onSubmitEditing={sendMessage} value={input} onChangeText={(text) => setInput(text)} placeholder="Write a message" style={styles.textInput} />
@@ -133,5 +178,25 @@ const styles = StyleSheet.create({
         borderRadius: 5,
         padding: 10,
         color: "grey",
+    },
+    receiver: {
+        marginBottom: 20,
+        position: "relative",
+        alignSelf: "flex-end",
+        marginRight: 15,
+        backgroundColor: "#ECECEC",
+        borderRadius: 5,
+        padding: 15,
+        maxWidth: '80%',
+    },
+    sender: {
+        marginBottom: 20,
+        position: "relative",
+        alignSelf: "flex-start",
+        marginRight: 15,
+        backgroundColor: "#FF0000",
+        borderRadius: 5,
+        padding: 15,
+        maxWidth: '80%',
     },
 });

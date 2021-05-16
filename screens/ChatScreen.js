@@ -29,7 +29,8 @@ const ChatScreen = ({ navigation, route }) => {
                     }}
                     >
                     <Avatar rounded source={{ 
-                        uri: "https://cencup.com/wp-content/uploads/2019/07/avatar-placeholder.png",
+                        uri: messages[0]?.data.photoURL ||
+                        "https://cencup.com/wp-content/uploads/2019/07/avatar-placeholder.png",
                      }} />
                     <TextInput
                     style={{ color: "white", marginLeft: 10, fontWeight: "700" }}
@@ -55,7 +56,7 @@ const ChatScreen = ({ navigation, route }) => {
                 </View>
             ),
         })
-    }, [navigation])
+    }, [navigation, messages])
 
     const sendMessage = () => {
         Keyboard.dismiss();
@@ -74,7 +75,7 @@ const ChatScreen = ({ navigation, route }) => {
         const unsubscribe = db.collection('chats')
         .doc(route.params.id)
         .collection('messages')
-        .orderBy('timestamp', 'desc')
+        .orderBy('timestamp', 'asc')
         .onSnapshot((snapshot) => setMessages(
             snapshot.docs.map((doc) => ({
                 id: doc.id,
@@ -94,7 +95,7 @@ const ChatScreen = ({ navigation, route }) => {
             >
                 <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
                     <>
-                    <ScrollView>
+                    <ScrollView contentContainerStyle={{ paddingTop: 15 }}>
                         {messages.map(({id, data}) => (
                             data.email === auth.currentUser.email ? (
                                 <View key={id} style={styles.receiver}>
@@ -117,7 +118,7 @@ const ChatScreen = ({ navigation, route }) => {
                                     <Text style={styles.receiverText}>{data.message}</Text>
                                 </View>
                             ) : (
-                                <View style={styles.sender}>
+                                <View key={id} style={styles.sender}>
                                     <Avatar 
                                     position="absolute"
                                     rounded
@@ -135,6 +136,7 @@ const ChatScreen = ({ navigation, route }) => {
                                      }}
                                     />
                                     <Text style={styles.senderText}>{data.message}</Text>
+                                    <Text style={styles.senderName}>{data.displayName}</Text>
                                 </View>
                             )
                         ))}
@@ -198,5 +200,22 @@ const styles = StyleSheet.create({
         borderRadius: 5,
         padding: 15,
         maxWidth: '80%',
+    },
+    senderText: {
+        color: "white",
+        fontWeight: "500",
+        marginLeft: 10,
+        marginBottom: 15,
+    },
+    senderName: {
+        left: 10,
+        paddingRight: 10,
+        fontSize: 10,
+        color: "white",
+    },
+    receiverText: {
+        color: "black",
+        fontWeight: "500",
+        marginLeft: 10,
     },
 });
